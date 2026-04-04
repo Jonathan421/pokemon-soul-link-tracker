@@ -2,8 +2,88 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 
+// --- NEUE KOMPONENTE: Smarte Pokémon Suche ---
+function PokemonSearch({ pokemonList, selectedId, onSelect, onDirty }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Wenn schon ein Pokémon gespeichert wurde, zeige seinen Namen an
+  useEffect(() => {
+    if (selectedId && pokemonList.length > 0) {
+      const pkmn = pokemonList.find(p => String(p.id) === String(selectedId));
+      if (pkmn) setSearchTerm(`#${pkmn.id} ${pkmn.name}`);
+    }
+  }, [selectedId, pokemonList]);
+
+  // Filter-Logik: Sucht nach Name ODER Nummer
+  const filtered = pokemonList.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    String(p.id).includes(searchTerm)
+  );
+
+  return (
+    <div style={{ position: 'relative', flex: 1 }}>
+      <input
+        type="text"
+        placeholder="🔍 Pkmn suchen..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setIsOpen(true);
+          onDirty();
+        }}
+        onFocus={() => {
+          setSearchTerm(''); // Leert das Feld beim Anklicken für einen schnellen neuen Suchbegriff
+          setIsOpen(true);
+        }}
+        // Timeout ist wichtig, damit der Klick auf die Liste registriert wird, bevor sie sich schließt
+        onBlur={() => setTimeout(() => setIsOpen(false), 200)} 
+        style={{ 
+          width: '100%', padding: '8px', fontSize: '0.85rem', borderRadius: '6px', 
+          border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9', boxSizing: 'border-box'
+        }}
+      />
+      
+      {/* Das ausklappbare Suchergebnis */}
+      {isOpen && (
+        <div style={{ 
+          position: 'absolute', top: '100%', left: 0, right: 0, 
+          maxHeight: '220px', overflowY: 'auto', background: '#1e293b', 
+          border: '1px solid #38bdf8', borderRadius: '6px', marginTop: '4px', zIndex: 50,
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)'
+        }}>
+          {filtered.length === 0 ? (
+            <div style={{ padding: '10px', color: '#94a3b8', fontSize: '0.8rem', textAlign: 'center' }}>Kein Treffer...</div>
+          ) : (
+            filtered.map(p => (
+              <div 
+                key={p.id} 
+                onClick={() => {
+                  onSelect(p.id);
+                  setSearchTerm(`#${p.id} ${p.name}`);
+                  setIsOpen(false);
+                  onDirty();
+                }}
+                style={{ 
+                  padding: '8px 10px', fontSize: '0.85rem', cursor: 'pointer', color: '#f1f5f9',
+                  borderBottom: '1px solid #0f172a', transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#334155'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ color: '#38bdf8', marginRight: '8px', fontWeight: 'bold' }}>#{p.id}</span> {p.name}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // 1. Die Mini-Komponente für die einzelnen Spieler (jetzt ohne Team-Status!)
-function PlayerEncounterRow({ player, route, pokemonList, runId, existingEncounter }) {
+// WICHTIG: onRefresh wurde hier in die Klammern hinzugefügt!
+function PlayerEncounterRow({ player, route, pokemonList, runId, existingEncounter, onRefresh }) {
   const [encounterStatus, setEncounterStatus] = useState(existingEncounter?.status_encounter || '');
   const [pokemonId, setPokemonId] = useState(existingEncounter?.pokemon_id || '');
   const [nickname, setNickname] = useState(existingEncounter?.nickname || '');
@@ -33,6 +113,7 @@ function PlayerEncounterRow({ player, route, pokemonList, runId, existingEncount
       alert("Fehler beim Speichern!");
     } else {
       setIsSaved(true);
+      if (onRefresh) onRefresh(); 
     }
     setLoading(false);
   };
@@ -81,21 +162,14 @@ function PlayerEncounterRow({ player, route, pokemonList, runId, existingEncount
       {/* Pokémon & Nickname Felder */}
       {encounterStatus === 'gefangen' && (
         <div style={{ display: 'flex', gap: '10px', flex: 1, minWidth: '250px' }}>
-          <select 
-            value={pokemonId}
-            onChange={(e) => { setPokemonId(e.target.value); setIsSaved(false); }}
-            style={{ 
-              padding: '10px', 
-              borderRadius: '8px', 
-              background: '#0f172a', 
-              color: 'white', 
-              border: '1px solid #334155', 
-              flex: 1 
-            }}
-          >
-            <option value="">-- Pokémon --</option>
-            {pokemonList.map(p => <option key={p.id} value={p.id}>#{p.id} {p.name}</option>)}
-          </select>
+          
+          {/* NEU: Hier ist jetzt die smarte Suche drin! */}
+          <PokemonSearch 
+            pokemonList={pokemonList} 
+            selectedId={pokemonId} 
+            onSelect={setPokemonId} 
+            onDirty={() => setIsSaved(false)} 
+          />
 
           <input 
             type="text" 
@@ -227,6 +301,7 @@ function RouteCard({ route, players, pokemonList, runId, encounters, onRefresh }
               pokemonList={pokemonList} 
               runId={runId}
               existingEncounter={existingEncounter}
+              onRefresh={onRefresh} // NEU: Hier geben wir die Update-Funktion an die Zeile weiter
             />
           )
         })}
