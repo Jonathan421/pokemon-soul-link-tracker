@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { supabase } from './supabase';
 
 // Deine Seiten-Imports (behalte deine bei)
-import Entry from './pages/Entry';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import CreateRun from './pages/CreateRun';
 import ActiveRun from './pages/ActiveRun';
@@ -41,7 +41,7 @@ export default function App() {
     <Router>
       <Routes>
         {/* Wenn KEINE Session da ist, zeige Entry, ansonsten direkt ins Dashboard */}
-        <Route path="/" element={!session ? <Entry /> : <Navigate to="/dashboard" />} />
+        <Route path="/" element={!session ? <Login /> : <Navigate to="/dashboard" />} />
         
         {/* Geschützte Routen: Wenn KEINE Session da ist, werfe zurück zum Entry */}
         <Route path="/dashboard" element={session ? <Dashboard /> : <Navigate to="/" />} />
