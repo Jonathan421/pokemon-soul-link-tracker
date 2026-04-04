@@ -1,22 +1,54 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
+import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { supabase } from './supabase';
+
+// Deine Seiten-Imports (behalte deine bei)
+import Entry from './pages/Entry';
 import Dashboard from './pages/Dashboard';
 import CreateRun from './pages/CreateRun';
-import ActiveRun from './pages/ActiveRun'; // NEU
+import ActiveRun from './pages/ActiveRun';
 import Stats from './pages/Stats';
 
-function App() {
+export default function App() {
+  const [session, setSession] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(true); // NEU: Der Lade-Zustand
+
+  useEffect(() => {
+    // 1. Fragt sofort den Status beim allerersten Laden ab
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsInitializing(false); // Supabase ist fertig mit Nachdenken!
+    });
+
+    // 2. Hört auf Änderungen (Login / Logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // WICHTIG: Solange Supabase den Login-Status noch prüft, zeigen wir nur einen Ladescreen
+  if (isInitializing) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a', color: '#38bdf8' }}>
+        <h2>Verifiziere Zugang...</h2>
+      </div>
+    );
+  }
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create-run" element={<CreateRun />} />
-        <Route path="/run/:id" element={<ActiveRun />} /> {/* NEU: Das :id ist ein Platzhalter */}
-        <Route path="/stats" element={<Stats />} />
+        {/* Wenn KEINE Session da ist, zeige Entry, ansonsten direkt ins Dashboard */}
+        <Route path="/" element={!session ? <Entry /> : <Navigate to="/dashboard" />} />
+        
+        {/* Geschützte Routen: Wenn KEINE Session da ist, werfe zurück zum Entry */}
+        <Route path="/dashboard" element={session ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/create-run" element={session ? <CreateRun /> : <Navigate to="/" />} />
+        <Route path="/run/:id" element={session ? <ActiveRun /> : <Navigate to="/" />} />
+        <Route path="/stats" element={session ? <Stats /> : <Navigate to="/" />} />
       </Routes>
     </Router>
   );
 }
-
-export default App;
