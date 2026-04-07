@@ -17,21 +17,117 @@ export default function ActiveRun() {
     const { data: routes } = await supabase.from('routes_master').select('*').eq('game_version', run.game_version).order('route_order');
     const { data: pkmn } = await supabase.from('pokemon_master').select('*').order('id');
     const { data: encs } = await supabase.from('encounters').select('*').eq('run_id', id);
+    
     setData({ run, players: pData.map(i => i.players), routes, pokemon: pkmn, encounters: encs });
     setLoading(false);
   };
 
   useEffect(() => { fetchSpielfeld(); }, [id]);
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Lädt...</div>;
+  if (loading) {
+    return (
+      <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#38bdf8', fontSize: '1.2rem', fontWeight: 'bold' }}>
+        Lade Hub...
+      </div>
+    );
+  }
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh' }}>
-      <header style={{ background: '#fff', padding: '20px 40px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
-        <h1 style={{ fontSize: '1.2rem' }}>{data.run?.name} HUB</h1>
-        <button onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer', background: 'none', border: 'none', fontWeight: 'bold' }}>Dashboard</button>
+    <div style={{ background: '#0f172a', minHeight: '100vh', paddingBottom: '100px' }}>
+      
+      {/* HEADER */}
+      <header style={{ 
+        background: '#1e293b', 
+        /* NEU: Dynamisches Padding für Safari Safe Area */
+        paddingTop: 'calc(15px + env(safe-area-inset-top))', 
+        paddingBottom: '15px',
+        paddingLeft: '40px',
+        paddingRight: '40px',
+        borderBottom: '1px solid #334155', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 100 
+      }}>
+        
+        {/* Linke Seite: Logo, Run Name & Teilnehmer */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          
+          {/* NEU: Das Pokéball Bild */}
+          <img 
+            src="/pokeball.png" /* Pfad zu deinem Bild im public Ordner */
+            alt="Pokéball Logo" 
+            style={{ 
+              width: '50px', 
+              height: '50px', 
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))' /* Leichter Glüh-Effekt */
+            }} 
+          />
+          
+          {/* Run Info */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <h1 style={{ 
+              margin: 0, 
+              color: '#f1f5f9', 
+              fontSize: '1.5rem', 
+              fontWeight: '900', 
+              letterSpacing: '0.5px', 
+              textTransform: 'uppercase' 
+            }}>
+              {data.run?.name}
+            </h1>
+            
+            {/* NEU: Die Teilnehmer-Liste */}
+            <div style={{ 
+              color: '#94a3b8', /* muted text color */
+              fontSize: '0.85rem', 
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{ color: '#38bdf8' }}>Unsere Helden:</span> 
+              {data.players.map(p => p.name).join(', ')}
+            </div>
+          </div>
+        </div>
+        
+        {/* Rechte Seite: Dashboard Button */}
+        <button 
+          onClick={() => navigate('/dashboard')} 
+          style={{ 
+            background: 'transparent', 
+            border: '2px solid #334155', 
+            color: '#f1f5f9', 
+            padding: '10px 18px',
+            borderRadius: '10px',
+            fontWeight: 'bold', 
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            transition: 'all 0.2s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}
+          onMouseEnter={(e) => { 
+            e.currentTarget.style.borderColor = '#38bdf8'; 
+            e.currentTarget.style.color = '#38bdf8'; 
+            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)';
+          }}
+          onMouseLeave={(e) => { 
+            e.currentTarget.style.borderColor = '#334155'; 
+            e.currentTarget.style.color = '#f1f5f9'; 
+            e.currentTarget.style.background = 'transparent';
+          }}
+        >
+          Dashboard
+        </button>
       </header>
 
+      {/* DAS GRID */}
       <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
           {data.routes.map(route => (
@@ -47,6 +143,7 @@ export default function ActiveRun() {
         </div>
       </div>
 
+      {/* OVERLAY */}
       {selectedRoute && (
         <RouteOverlay 
           route={selectedRoute} 
