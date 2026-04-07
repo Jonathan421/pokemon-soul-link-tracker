@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import RouteCard from '../components/RouteCard';
 import RouteOverlay from '../components/RouteOverlay';
 import RunStats from '../components/RunStats';
+import EndRunModal from '../components/EndRunModal';
 
 export default function ActiveRun() {
   const { id } = useParams();
@@ -11,6 +12,7 @@ export default function ActiveRun() {
   const [data, setData] = useState({ run: null, players: [], routes: [], pokemon: [], encounters: [] });
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showEndModal, setShowEndModal] = useState(false);
   
   // NEU: State für den Toggle-Switch
   const [hideLostRoutes, setHideLostRoutes] = useState(false);
@@ -68,46 +70,58 @@ export default function ActiveRun() {
       }}>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <img 
-            src="/pokeball.png" 
-            alt="Pokéball Logo" 
-            style={{ 
-              width: '50px', height: '50px', objectFit: 'contain',
-              filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))'
-            }} 
-          />
-          
+          <img src="/pokeball.png" alt="Pokéball Logo" style={{ width: '50px', height: '50px', objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))' }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <h1 style={{ margin: 0, color: '#f1f5f9', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              {data.run?.name}
-            </h1>
+            <h1 style={{ margin: 0, color: '#f1f5f9', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{data.run?.name}</h1>
             <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ color: '#38bdf8' }}>Unsere Helden:</span> {data.players.map(p => p.name).join(', ')}
             </div>
           </div>
         </div>
         
-        <button 
-          onClick={() => navigate('/dashboard')} 
-          style={{ 
-            background: 'transparent', border: '2px solid #334155', color: '#f1f5f9', padding: '10px 18px',
-            borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem',
-            transition: 'all 0.2s ease', textTransform: 'uppercase', letterSpacing: '0.5px'
-          }}
-          onMouseEnter={(e) => { 
-            e.currentTarget.style.borderColor = '#38bdf8'; 
-            e.currentTarget.style.color = '#38bdf8'; 
-            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)';
-          }}
-          onMouseLeave={(e) => { 
-            e.currentTarget.style.borderColor = '#334155'; 
-            e.currentTarget.style.color = '#f1f5f9'; 
-            e.currentTarget.style.background = 'transparent';
-          }}
-        >
-          Dashboard
-        </button>
+        <div style={{ display: 'flex', gap: '15px' }}>
+          {/* NEU: Run beenden Button (Nur anzeigen, wenn Run noch nicht beendet ist) */}
+          {!data.run?.is_completed && (
+            <button 
+              onClick={() => setShowEndModal(true)} 
+              style={{ background: 'rgba(239, 68, 68, 0.1)', border: '2px solid #ef4444', color: '#ef4444', padding: '10px 18px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.2s ease', textTransform: 'uppercase', letterSpacing: '0.5px' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.color = '#ef4444'; }}
+            >
+              Run beenden
+            </button>
+          )}
+
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            style={{ background: 'transparent', border: '2px solid #334155', color: '#f1f5f9', padding: '10px 18px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.2s ease', textTransform: 'uppercase', letterSpacing: '0.5px' }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#38bdf8'; e.currentTarget.style.color = '#38bdf8'; e.currentTarget.style.background = 'rgba(56, 189, 248, 0.05)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.color = '#f1f5f9'; e.currentTarget.style.background = 'transparent'; }}
+          >
+            Dashboard
+          </button>
+        </div>
       </header>
+
+      {/* NEU: Das Status-Banner, wenn der Run vorbei ist */}
+      {data.run?.is_completed && (
+        <div style={{ 
+          background: data.run.run_result === 'won' ? 'linear-gradient(135deg, #ca8a04, #eab308)' : 'linear-gradient(135deg, #991b1b, #ef4444)', 
+          padding: '20px', 
+          textAlign: 'center', 
+          color: '#fff', 
+          fontWeight: '900', 
+          fontSize: '1.2rem', 
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
+          boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
+        }}>
+          {data.run.run_result === 'won' 
+            ? '🏆 IHR HABT DEN SOULLINK GEWONNEN! HERZLICHEN GLÜCKWUNSCH! 🏆' 
+            : `WIPE OUT! ${data.players.find(p => p.id === data.run.blamed_player_id)?.name || 'Jemand'} hat den Run auf dem Gewissen!`
+          }
+        </div>
+      )}
 
       {/* CONTENT BEREICH */}
       <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
@@ -188,6 +202,17 @@ export default function ActiveRun() {
           onRefresh={fetchSpielfeld}
         />
       )}
+
+      {/* END RUN MODAL */}
+      {showEndModal && (
+        <EndRunModal 
+          runId={data.run.id} 
+          players={data.players} 
+          onClose={() => setShowEndModal(false)} 
+          onRefresh={fetchSpielfeld} 
+        />
+      )}
+
     </div>
   );
 }
