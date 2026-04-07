@@ -1,35 +1,11 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../supabase';
+import { useRuns } from '../hooks/useRuns'; // Unser neuer Hook!
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [runs, setRuns] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchRuns = async () => {
-    const { data, error } = await supabase
-      .from('runs')
-      .select(`
-        *,
-        run_players (
-          players ( id, name )
-        )
-      `)
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setRuns(data);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchRuns();
-  }, []);
-
-  const activeRuns = runs.filter(run => !run.is_completed);
-  const completedRuns = runs.filter(run => run.is_completed);
+  // Hier passiert die Magie: Keine useEffects oder Supabase-Imports mehr nötig!
+  const { runs, loading, error } = useRuns();
 
   if (loading) {
     return (
@@ -38,6 +14,18 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ef4444', fontSize: '1.2rem', fontWeight: 'bold' }}>
+        Fehler: {error}
+      </div>
+    );
+  }
+
+  // Filterung (wir greifen jetzt auf unsere sauberen Properties zu)
+  const activeRuns = runs.filter(run => !run.isCompleted);
+  const completedRuns = runs.filter(run => run.isCompleted);
 
   const lineClampStyle = {
     display: '-webkit-box',
@@ -50,35 +38,29 @@ export default function Dashboard() {
     margin: 0
   };
 
+  // Die Tabellenzeile nutzt jetzt die vorformatierten Daten aus dem Service
   const RunTableRow = ({ run, isActive }) => {
-    const playerNames = run.run_players?.map(rp => rp.players?.name).filter(Boolean).join(', ') || 'Keine Spieler';
-    const guiltyPlayer = run.run_players?.find(rp => rp.players?.id === run.blamed_player_id)?.players?.name || 'Unbekannt';
-
     return (
       <tr style={{ borderBottom: '1px solid #334155', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-        
         <td style={{ padding: '16px', verticalAlign: 'middle' }}>
           <div style={{ ...lineClampStyle, fontWeight: '900', color: '#f1f5f9', fontSize: '1.1rem' }}>
             {run.name}
           </div>
         </td>
-
         <td style={{ padding: '16px', verticalAlign: 'middle' }}>
           <div style={{ ...lineClampStyle, color: '#94a3b8', fontWeight: '600' }}>
-            {run.game_version}
+            {run.gameTitle}
           </div>
         </td>
-
         <td style={{ padding: '16px', verticalAlign: 'middle' }}>
           <div style={{ ...lineClampStyle, color: '#cbd5e1', fontWeight: '600', lineHeight: '1.4' }}>
-            {playerNames}
+            {run.playerNames}
           </div>
         </td>
-
         <td style={{ padding: '16px', verticalAlign: 'middle' }}>
           {isActive ? (
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button 
+              <button
                 onClick={() => navigate(`/run/${run.id}`)}
                 style={{ background: '#38bdf8', color: '#0f172a', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 10px rgba(56, 189, 248, 0.2)', whiteSpace: 'nowrap' }}
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
@@ -88,18 +70,17 @@ export default function Dashboard() {
               </button>
             </div>
           ) : (
-            /* Das Layout hier wurde auf space-between geändert, damit der Name links und der Button rechts ist */
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '15px' }}>
-              {run.run_result === 'won' ? (
+              {run.resultStatus === 'won' ? (
                 <span style={{ color: '#eab308', fontWeight: '900', whiteSpace: 'nowrap', textAlign: 'left' }}>
                   GEWONNEN
                 </span>
               ) : (
                 <span style={{ color: '#ef4444', fontWeight: '900', whiteSpace: 'nowrap', textAlign: 'left' }}>
-                  {guiltyPlayer}
+                  {run.guiltyPlayerName}
                 </span>
               )}
-              <button 
+              <button
                 onClick={() => navigate(`/run/${run.id}`)}
                 style={{ background: 'transparent', color: '#94a3b8', padding: '8px 16px', borderRadius: '8px', border: '2px solid #334155', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s', whiteSpace: 'nowrap' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#f1f5f9'; e.currentTarget.style.color = '#f1f5f9'; }}
@@ -117,63 +98,29 @@ export default function Dashboard() {
   return (
     <div style={{ background: '#0f172a', minHeight: '100vh', padding: '40px 20px', color: '#f1f5f9' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        
+
         {/* HEADER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px' }}>
           <div>
-            <h1 style={{ 
-              margin: 0, 
-              fontSize: '2rem', 
-              fontWeight: '900', 
-              textTransform: 'uppercase', 
-              letterSpacing: '1px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '15px',
-              color: '#f1f5f9' 
-            }}>
+            <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '15px', color: '#f1f5f9' }}>
               <img src="/pokeball.png" alt="Pokéball" style={{ width: '40px', height: '40px', filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))' }} />
               Soullink Hub
             </h1>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '15px' }}>
-            {/* Button zur Stats / Bundesliga Seite */}
-            <button 
-              onClick={() => navigate('/stats')} 
-              style={{ 
-                background: '#1e293b', 
-                color: '#38bdf8', 
-                padding: '12px 24px', 
-                borderRadius: '12px', 
-                border: '2px solid #334155', 
-                fontWeight: '900', 
-                cursor: 'pointer', 
-                fontSize: '1rem', 
-                textTransform: 'uppercase',
-                transition: 'all 0.2s'
-              }}
+            <button
+              onClick={() => navigate('/stats')}
+              style={{ background: '#1e293b', color: '#38bdf8', padding: '12px 24px', borderRadius: '12px', border: '2px solid #334155', fontWeight: '900', cursor: 'pointer', fontSize: '1rem', textTransform: 'uppercase', transition: 'all 0.2s' }}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#38bdf8'; e.currentTarget.style.background = '#0f172a'; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#1e293b'; }}
             >
               Statistik
             </button>
 
-            <button 
-              onClick={() => navigate('/create-run')} 
-              style={{ 
-                background: '#10b981', 
-                color: '#fff', 
-                padding: '12px 24px', 
-                borderRadius: '12px', 
-                border: 'none', 
-                fontWeight: '900', 
-                cursor: 'pointer', 
-                fontSize: '1rem', 
-                textTransform: 'uppercase', 
-                boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-                transition: 'transform 0.2s'
-              }}
+            <button
+              onClick={() => navigate('/create-run')}
+              style={{ background: '#10b981', color: '#fff', padding: '12px 24px', borderRadius: '12px', border: 'none', fontWeight: '900', cursor: 'pointer', fontSize: '1rem', textTransform: 'uppercase', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)', transition: 'transform 0.2s' }}
               onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
@@ -187,7 +134,6 @@ export default function Dashboard() {
           <h2 style={{ color: '#38bdf8', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', borderBottom: '2px solid #334155', paddingBottom: '10px' }}>
             Aktive Runs
           </h2>
-          
           {activeRuns.length > 0 ? (
             <div style={{ background: '#1e293b', borderRadius: '16px', overflow: 'hidden', border: '1px solid #334155', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', tableLayout: 'fixed' }}>
@@ -211,12 +157,11 @@ export default function Dashboard() {
           )}
         </section>
 
-        {/* TABELLE 2: HISTORIE (BEENDETE RUNS) */}
+        {/* TABELLE 2: HISTORIE */}
         <section>
           <h2 style={{ color: '#94a3b8', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', borderBottom: '2px solid #334155', paddingBottom: '10px' }}>
             Historie
           </h2>
-          
           {completedRuns.length > 0 ? (
             <div style={{ background: '#1e293b', borderRadius: '16px', overflow: 'hidden', border: '1px solid #334155', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', opacity: 0.85 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', tableLayout: 'fixed' }}>

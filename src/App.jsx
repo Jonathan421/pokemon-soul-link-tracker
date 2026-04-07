@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { supabase } from './supabase';
 
-// Deine Seiten-Imports (behalte deine bei)
+// WICHTIG: Hier ist der korrekte Pfad zu deinem neuen api-Ordner!
+import { supabase } from './api/supabaseClient';
+
+// Deine Seiten-Imports
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import CreateRun from './pages/CreateRun';
@@ -11,7 +13,7 @@ import Stats from './pages/Stats';
 
 export default function App() {
   const [session, setSession] = useState(null);
-  const [isInitializing, setIsInitializing] = useState(true); // NEU: Der Lade-Zustand
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     // 1. Fragt sofort den Status beim allerersten Laden ab
@@ -42,7 +44,7 @@ export default function App() {
       <Routes>
         {/* Wenn KEINE Session da ist, zeige Entry, ansonsten direkt ins Dashboard */}
         <Route path="/" element={!session ? <Login /> : <Navigate to="/dashboard" />} />
-        
+
         {/* Geschützte Routen: Wenn KEINE Session da ist, werfe zurück zum Entry */}
         <Route path="/dashboard" element={session ? <Dashboard /> : <Navigate to="/" />} />
         <Route path="/create-run" element={session ? <CreateRun /> : <Navigate to="/" />} />
