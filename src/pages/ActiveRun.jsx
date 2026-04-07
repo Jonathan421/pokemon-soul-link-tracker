@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import RouteCard from '../components/RouteCard';
 import RouteOverlay from '../components/RouteOverlay';
-import RunStats from '../components/RunStats'; // <-- NEU: Import hinzugefügt
+import RunStats from '../components/RunStats';
 
 export default function ActiveRun() {
   const { id } = useParams();
@@ -11,6 +11,9 @@ export default function ActiveRun() {
   const [data, setData] = useState({ run: null, players: [], routes: [], pokemon: [], encounters: [] });
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // NEU: State für den Toggle-Switch
+  const [hideLostRoutes, setHideLostRoutes] = useState(false);
 
   const fetchSpielfeld = async () => {
     const { data: run } = await supabase.from('runs').select('*').eq('id', id).single();
@@ -33,6 +36,17 @@ export default function ActiveRun() {
     );
   }
 
+  // NEU: Logik, um die sichtbaren Routen zu filtern
+  const visibleRoutes = data.routes.filter(route => {
+    if (!hideLostRoutes) return true; // Wenn Schalter aus, zeige alle
+    
+    // Prüfe, ob die Route verloren ist (irgendein Spieler hat Status "verloren" oder Link ist "besiegt")
+    const routeEncounters = data.encounters.filter(e => e.route_id === route.id);
+    const isLost = routeEncounters.some(e => e.status_encounter === 'verloren' || e.status_team === 'besiegt');
+    
+    return !isLost; // Behalte die Route nur, wenn sie NICHT verloren ist
+  });
+
   return (
     <div style={{ background: '#0f172a', minHeight: '100vh', paddingBottom: '100px' }}>
       
@@ -53,60 +67,32 @@ export default function ActiveRun() {
         zIndex: 100 
       }}>
         
-        {/* Linke Seite: Logo, Run Name & Teilnehmer */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <img 
             src="/pokeball.png" 
             alt="Pokéball Logo" 
             style={{ 
-              width: '50px', 
-              height: '50px', 
-              objectFit: 'contain',
+              width: '50px', height: '50px', objectFit: 'contain',
               filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))'
             }} 
           />
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <h1 style={{ 
-              margin: 0, 
-              color: '#f1f5f9', 
-              fontSize: '1.5rem', 
-              fontWeight: '900', 
-              letterSpacing: '0.5px', 
-              textTransform: 'uppercase' 
-            }}>
+            <h1 style={{ margin: 0, color: '#f1f5f9', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
               {data.run?.name}
             </h1>
-            
-            <div style={{ 
-              color: '#94a3b8',
-              fontSize: '0.85rem', 
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <span style={{ color: '#38bdf8' }}>Unsere Helden:</span> 
-              {data.players.map(p => p.name).join(', ')}
+            <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: '#38bdf8' }}>Unsere Helden:</span> {data.players.map(p => p.name).join(', ')}
             </div>
           </div>
         </div>
         
-        {/* Rechte Seite: Dashboard Button */}
         <button 
           onClick={() => navigate('/dashboard')} 
           style={{ 
-            background: 'transparent', 
-            border: '2px solid #334155', 
-            color: '#f1f5f9', 
-            padding: '10px 18px',
-            borderRadius: '10px',
-            fontWeight: 'bold', 
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-            transition: 'all 0.2s ease',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            background: 'transparent', border: '2px solid #334155', color: '#f1f5f9', padding: '10px 18px',
+            borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem',
+            transition: 'all 0.2s ease', textTransform: 'uppercase', letterSpacing: '0.5px'
           }}
           onMouseEnter={(e) => { 
             e.currentTarget.style.borderColor = '#38bdf8'; 
@@ -126,22 +112,68 @@ export default function ActiveRun() {
       {/* CONTENT BEREICH */}
       <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
         
-        {/* NEU: Die ausgelagerte Stats-Komponente */}
         <RunStats players={data.players} encounters={data.encounters} />
 
-        {/* DAS GRID */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-          {data.routes.map(route => (
-            <RouteCard 
-              key={route.id} 
-              route={route} 
-              players={data.players} 
-              pokemonList={data.pokemon} 
-              encounters={data.encounters} 
-              onOpen={() => setSelectedRoute(route)} 
-            />
-          ))}
+        {/* NEU: Toolbar für Routen & Filter */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', padding: '0 5px' }}>
+          <h2 style={{ margin: 0, color: '#f1f5f9', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Routen ({visibleRoutes.length})
+          </h2>
+
+          {/* Der Toggle-Switch */}
+          <div 
+            onClick={() => setHideLostRoutes(!hideLostRoutes)}
+            style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+          >
+            <span style={{ 
+              color: hideLostRoutes ? '#f1f5f9' : '#94a3b8', 
+              fontSize: '0.85rem', 
+              fontWeight: 'bold', 
+              transition: 'color 0.3s' 
+            }}>
+              Verlorene ausblenden
+            </span>
+            <div style={{
+              width: '44px', height: '24px', 
+              background: hideLostRoutes ? '#38bdf8' : '#334155',
+              borderRadius: '20px', 
+              position: 'relative', 
+              transition: 'background 0.3s',
+              boxShadow: hideLostRoutes ? '0 0 10px rgba(56, 189, 248, 0.3)' : 'none'
+            }}>
+              <div style={{
+                width: '18px', height: '18px', 
+                background: '#ffffff', 
+                borderRadius: '50%',
+                position: 'absolute', 
+                top: '3px', 
+                left: hideLostRoutes ? '23px' : '3px', 
+                transition: 'left 0.3s ease-in-out',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              }} />
+            </div>
+          </div>
         </div>
+
+        {/* DAS GRID (Nutzt jetzt visibleRoutes statt data.routes) */}
+        {visibleRoutes.length > 0 ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            {visibleRoutes.map(route => (
+              <RouteCard 
+                key={route.id} 
+                route={route} 
+                players={data.players} 
+                pokemonList={data.pokemon} 
+                encounters={data.encounters} 
+                onOpen={() => setSelectedRoute(route)} 
+              />
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontSize: '1.1rem', fontWeight: 'bold' }}>
+            Alle sichtbaren Routen wurden gefiltert! 🪦
+          </div>
+        )}
       </div>
 
       {/* OVERLAY */}
