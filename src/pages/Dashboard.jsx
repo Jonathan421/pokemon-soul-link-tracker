@@ -121,19 +121,65 @@ export default function Dashboard() {
         {/* HEADER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <h1 style={{ 
+              margin: 0, 
+              fontSize: '2rem', 
+              fontWeight: '900', 
+              textTransform: 'uppercase', 
+              letterSpacing: '1px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '15px',
+              color: '#f1f5f9' 
+            }}>
               <img src="/pokeball.png" alt="Pokéball" style={{ width: '40px', height: '40px', filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))' }} />
               Soullink Hub
             </h1>
-            <p style={{ color: '#94a3b8', margin: '5px 0 0 55px', fontWeight: '600' }}>Willkommen im Kontrollzentrum</p>
           </div>
           
-          <button 
-            onClick={() => navigate('/create-run')} 
-            style={{ background: '#10b981', color: '#fff', padding: '12px 24px', borderRadius: '12px', border: 'none', fontWeight: '900', cursor: 'pointer', fontSize: '1rem', textTransform: 'uppercase', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)' }}
-          >
-            Neuen Run starten
-          </button>
+          <div style={{ display: 'flex', gap: '15px' }}>
+            {/* Button zur Stats / Bundesliga Seite */}
+            <button 
+              onClick={() => navigate('/stats')} 
+              style={{ 
+                background: '#1e293b', 
+                color: '#38bdf8', 
+                padding: '12px 24px', 
+                borderRadius: '12px', 
+                border: '2px solid #334155', 
+                fontWeight: '900', 
+                cursor: 'pointer', 
+                fontSize: '1rem', 
+                textTransform: 'uppercase',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#38bdf8'; e.currentTarget.style.background = '#0f172a'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#1e293b'; }}
+            >
+              Statistik
+            </button>
+
+            <button 
+              onClick={() => navigate('/create-run')} 
+              style={{ 
+                background: '#10b981', 
+                color: '#fff', 
+                padding: '12px 24px', 
+                borderRadius: '12px', 
+                border: 'none', 
+                fontWeight: '900', 
+                cursor: 'pointer', 
+                fontSize: '1rem', 
+                textTransform: 'uppercase', 
+                boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+                transition: 'transform 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              Neuer Run
+            </button>
+          </div>
         </div>
 
         {/* TABELLE 1: AKTIVE RUNS */}
