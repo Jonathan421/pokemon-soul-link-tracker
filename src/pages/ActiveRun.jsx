@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import RouteCard from '../components/RouteCard';
 import RouteOverlay from '../components/RouteOverlay';
+import RunStats from '../components/RunStats'; // <-- NEU: Import hinzugefügt
 
 export default function ActiveRun() {
   const { id } = useParams();
@@ -38,7 +39,6 @@ export default function ActiveRun() {
       {/* HEADER */}
       <header style={{ 
         background: '#1e293b', 
-        /* NEU: Dynamisches Padding für Safari Safe Area */
         paddingTop: 'calc(15px + env(safe-area-inset-top))', 
         paddingBottom: '15px',
         paddingLeft: '40px',
@@ -55,20 +55,17 @@ export default function ActiveRun() {
         
         {/* Linke Seite: Logo, Run Name & Teilnehmer */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          
-          {/* NEU: Das Pokéball Bild */}
           <img 
-            src="/pokeball.png" /* Pfad zu deinem Bild im public Ordner */
+            src="/pokeball.png" 
             alt="Pokéball Logo" 
             style={{ 
               width: '50px', 
               height: '50px', 
               objectFit: 'contain',
-              filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))' /* Leichter Glüh-Effekt */
+              filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))'
             }} 
           />
           
-          {/* Run Info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <h1 style={{ 
               margin: 0, 
@@ -81,9 +78,8 @@ export default function ActiveRun() {
               {data.run?.name}
             </h1>
             
-            {/* NEU: Die Teilnehmer-Liste */}
             <div style={{ 
-              color: '#94a3b8', /* muted text color */
+              color: '#94a3b8',
               fontSize: '0.85rem', 
               fontWeight: '600',
               display: 'flex',
@@ -127,8 +123,13 @@ export default function ActiveRun() {
         </button>
       </header>
 
-      {/* DAS GRID */}
+      {/* CONTENT BEREICH */}
       <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
+        
+        {/* NEU: Die ausgelagerte Stats-Komponente */}
+        <RunStats players={data.players} encounters={data.encounters} />
+
+        {/* DAS GRID */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
           {data.routes.map(route => (
             <RouteCard 
