@@ -1,16 +1,90 @@
-# React + Vite
+# 🔗 Pokémon Soul Link Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Der ultimative Begleiter für deine Pokémon Soul Link Nuzlocke Challenges! 
+Diese Web-App hilft dir und deinem Koop-Partner dabei, Runs zu organisieren, Routen und Encounters zu tracken, Tode festzuhalten und eure Erfolge in der Hall of Fame zu verewigen.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+* **Dashboard:** Übersicht aller aktiven Runs und der historischen Ergebnisse.
+* **Dynamische Runs:** Unterstützung für verschiedene Editionen (z.B. Pokémon Platin). Das System lädt automatisch die passenden Routen und Meilensteine (Orden).
+* **Interaktives Spielfeld (Active Run):**
+  * Ansicht nach Storyline sortiert
+  * Status-Boxen: Sieh den Fortschritt ganzer Gebiete auf einen Blick.
+  * Encounter-Tracking: Fange, verliere oder überspringe Pokémon auf spezifischen Routen.
+  * Wipe-Out-Tracking: Finde heraus, wer den Run auf dem Gewissen hat!
+* **Hall of Fame (Statistiken):** Übersicht der verlorenen Links und der Win/Loss-Ratio.
+* **Sicheres Login:** Master-Account Schutz für die Datenverwaltung.
+* **UI:** Responsives Design mit Darkmode und dezentem Pokémon-Theme.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* **Frontend:** React.js
+* **Backend / Database:** Supabase (PostgreSQL)
+* **Authentication:** Supabase Auth
+* **Styling:** Inline-Styles & CSS
+* **Architektur:** MVVM / Repository Pattern
 
-## Expanding the ESLint configuration
+## 📂 Projektstruktur
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Das Projekt folgt einer sauberen Architektur, um Skalierbarkeit und Wartbarkeit zu gewährleisten:
+
+```text
+src/
+├── api/                # Datenbank-Services
+├── components/         # UI-Komponenten
+├── hooks/              # Hooks für State-Management und Logik
+├── pages/              # Hauptansichten
+└── App.jsx             # Routing
+````
+
+## ⚙️ Installation & lokales Setup
+
+Folge diesen Schritten, um das Projekt lokal auf deinem Rechner zum Laufen zu bringen:
+
+### 1\. Repository klonen
+
+````
+git clone \<deine-repo-url\>
+cd soullink-tracker
+````
+
+### 2\. Abhängigkeiten installieren
+
+````
+npm install
+````
+
+### 3\. Umgebungsvariablen (.env) einrichten
+
+Erstelle im Hauptverzeichnis (auf derselben Ebene wie die `package.json`) eine Datei namens `.env` und füge deine Supabase-Keys ein:
+
+````
+VITE_SUPABASE_URL=deine\_supabase\_projekt\_url
+VITE_SUPABASE_ANON_KEY=dein\_supabase\_anon\_key
+````
+*(Hinweis: Diese Datei wird von Git ignoriert und niemals öffentlich hochgeladen.)*
+
+### 4\. Entwicklungsserver starten
+
+````
+npm run dev
+````
+Öffne nun deinen Browser unter `http://localhost:5173` (oder der im Terminal angegebenen URL).
+
+## 🗄️ Datenbank-Schema (Supabase)
+
+Das Projekt baut auf einer relationalen Datenbankstruktur auf:
+
+  * `games`: Verfügbare Editionen (z.B. Platin, HeartGold).
+  * `milestones`: Abschnitte eines Spiels (z.B. Orden 1, Pokémon Liga), verknüpft mit einer `game_id`.
+  * `routes_master`: Alle Routen eines Spiels, zugeordnet zu `milestones`.
+  * `pokemon_master`: Der globale Pokédex.
+  * `players`: Die Teilnehmer der Soul Links.
+  * `runs` & `run_players`: Verwaltet die einzelnen Spieldurchläufe und wer daran teilnimmt.
+  * `encounters`: Speichert jedes Pokémon, das auf einer Route gefangen, verloren oder ausgelassen wurde.
+
+## 🔮 Geplante Features / Roadmap
+
+  * Hinzufügen weiterer Pokémon-Editionen (HeartGold/SoulSilver, Schwarz/Weiß).
+  * Profilseiten für individuelle Spieler-Statistiken.
+  * Export-Funktion für Run-Zusammenfassungen (als Bild zum Teilen).
