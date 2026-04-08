@@ -21,7 +21,7 @@ export default function ActiveRun() {
 
   if (loading) {
     return (
-      <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#38bdf8', fontSize: '1.2rem', fontWeight: 'bold' }}>
+      <div style={{ background: 'transparent', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#38bdf8', fontSize: '1.2rem', fontWeight: 'bold' }}>
         Lade Spielfeld...
       </div>
     );
@@ -29,7 +29,7 @@ export default function ActiveRun() {
 
   if (error) {
     return (
-      <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ef4444', fontSize: '1.2rem', fontWeight: 'bold' }}>
+      <div style={{ background: 'transparent', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ef4444', fontSize: '1.2rem', fontWeight: 'bold' }}>
         Fehler: {error}
       </div>
     );
@@ -92,7 +92,7 @@ export default function ActiveRun() {
   };
 
   return (
-    <div style={{ background: '#0f172a', minHeight: '100vh', paddingBottom: '100px' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', paddingBottom: '100px' }}>
       {/* HEADER (Unverändert) */}
       <header style={{ background: '#1e293b', paddingTop: 'calc(15px + env(safe-area-inset-top))', paddingBottom: '15px', paddingLeft: '40px', paddingRight: '40px', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>

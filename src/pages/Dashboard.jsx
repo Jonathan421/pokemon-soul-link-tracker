@@ -9,7 +9,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#38bdf8', fontSize: '1.2rem', fontWeight: 'bold' }}>
+      <div style={{ background: 'transparent', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#38bdf8', fontSize: '1.2rem', fontWeight: 'bold' }}>
         Lade Dashboard...
       </div>
     );
@@ -17,7 +17,7 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ef4444', fontSize: '1.2rem', fontWeight: 'bold' }}>
+      <div style={{ background: 'transparent', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ef4444', fontSize: '1.2rem', fontWeight: 'bold' }}>
         Fehler: {error}
       </div>
     );
@@ -96,7 +96,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ background: '#0f172a', minHeight: '100vh', padding: '40px 20px', color: '#f1f5f9' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', padding: '40px 20px', color: '#f1f5f9' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
 
         {/* HEADER */}

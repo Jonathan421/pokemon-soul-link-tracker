@@ -10,10 +10,19 @@
 
 body {
   margin: 0;
-  padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #f1f5f9;
+
+  background-color: #0f172a;
+  background-image:
+    radial-gradient(circle at 50% 0%, #1e293b 0%, transparent 60%),
+    url('/pokeball-pattern.svg');
+
+  /* ÄNDERUNG HIER: Das zweite Maß auf 400px setzen */
+  background-size: 100% 100%, 400px 400px;
+
+  background-attachment: fixed;
 }
 
 button {

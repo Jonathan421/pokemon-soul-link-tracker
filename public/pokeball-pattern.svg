@@ -1,0 +1,28 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <g id="pb" stroke="#ffffff" stroke-width="2" fill="none">
+      <circle cx="0" cy="0" r="20" />
+      <line x1="-20" y1="0" x2="20" y2="0" />
+      <circle cx="0" cy="0" r="6" />
+      <circle cx="0" cy="0" r="3" />
+    </g>
+    <path id="sp" d="M0,-8 Q0,0 8,0 Q0,0 0,8 Q0,0 -8,0 Q0,0 0,-8" fill="#ffffff" />
+  </defs>
+
+  <g opacity="0.03">
+    <use href="#pb" transform="translate(60, 60) scale(1.2) rotate(15)" />
+    <use href="#pb" transform="translate(280, 90) scale(0.7) rotate(-25)" />
+    <use href="#pb" transform="translate(150, 240) scale(1.5) rotate(45)" />
+    <use href="#pb" transform="translate(320, 310) scale(0.9) rotate(-10)" />
+    <use href="#pb" transform="translate(50, 330) scale(0.6) rotate(70)" />
+    <use href="#pb" transform="translate(200, 30) scale(0.5) rotate(-40)" />
+    <use href="#pb" transform="translate(360, 180) scale(1.1) rotate(20)" />
+    <use href="#pb" transform="translate(100, 160) scale(0.8) rotate(-60)" />
+
+    <use href="#sp" transform="translate(180, 100) scale(0.8)" />
+    <use href="#sp" transform="translate(80, 220) scale(1.2)" />
+    <use href="#sp" transform="translate(290, 220) scale(0.6)" />
+    <use href="#sp" transform="translate(220, 340) scale(1)" />
+    <use href="#sp" transform="translate(350, 60) scale(0.9)" />
+  </g>
+</svg>

@@ -24,7 +24,7 @@ export default function Stats() {
   }
 
   return (
-    <div style={{ background: '#0f172a', minHeight: '100vh', padding: '40px 20px', color: '#f1f5f9' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', padding: '40px 20px', color: '#f1f5f9' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
 
         {/* HEADER */}

@@ -73,7 +73,7 @@ export default function CreateRun() {
   if (error) return <div style={{ color: 'red', textAlign: 'center', marginTop: '50px' }}>{error}</div>;
 
   return (
-    <div style={{ background: '#0f172a', minHeight: '100vh', padding: '40px 20px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', padding: '40px 20px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
       <div style={{ width: '100%', maxWidth: '600px', background: '#1e293b', padding: '40px', borderRadius: '24px', border: '1px solid #334155', boxShadow: '0 20px 50px rgba(0,0,0,0.4)' }}>
 
         {/* HEADER MIT DISMISS BUTTON */}
