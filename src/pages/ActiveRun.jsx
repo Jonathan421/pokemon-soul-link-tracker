@@ -45,11 +45,28 @@ export default function ActiveRun() {
     });
   };
 
+  // Hilfsfunktion: Berechnet die Farbe für die kleinen Status-Boxen
+  const getRouteColor = (route) => {
+    const routeEncounters = data.encounters.filter(e => e.route_id === route.id);
+    const isDead = routeEncounters[0]?.status_team === 'besiegt';
+    const isComplete = routeEncounters.length === data.players.length &&
+      routeEncounters.every(e => e.status_encounter !== '');
+
+    if (isDead) return '#ef4444'; // Rot (Wipe)
+    if (isComplete) return '#22c55e'; // Grün (Abgeschlossen)
+    if (routeEncounters.length > 0) return '#0ea5e9'; // Blau (In Bearbeitung)
+    return '#475569'; // Dunkelgrau (Noch unberührt)
+  };
+
   const toggleMilestone = (milestoneId) => {
-    setExpandedMilestones(prev => ({
-      ...prev,
-      [milestoneId]: !prev[milestoneId]
-    }));
+    setExpandedMilestones(prev => {
+      // Wir prüfen, ob es aktuell offen ist (Standard ist jetzt offen, also alles außer "false")
+      const isCurrentlyExpanded = prev[milestoneId] !== false;
+      return {
+        ...prev,
+        [milestoneId]: !isCurrentlyExpanded
+      };
+    });
   };
 
   // Hilfskomponente zum Rendern einer Route-Liste
@@ -123,7 +140,7 @@ export default function ActiveRun() {
         {/* MILESTONE ACCORDIONS */}
         {data.milestones.map(milestone => {
           const mRoutes = getRoutesByMilestone(milestone.id);
-          const isExpanded = expandedMilestones[milestone.id];
+          const isExpanded = expandedMilestones[milestone.id] !== false;
 
           return (
             <div
@@ -141,35 +158,50 @@ export default function ActiveRun() {
                 onClick={() => toggleMilestone(milestone.id)}
                 style={{
                   padding: '15px 20px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
+                  display: 'grid',
+                  // 3 feste Spalten: Titel (mind. 180px oder 30%), Boxen (restlicher Platz), Pfeil (20px)
+                  gridTemplateColumns: 'minmax(180px, 30%) 1fr 20px',
                   alignItems: 'center',
+                  gap: '15px',
                   cursor: 'pointer',
-                  // ÄNDERUNG: Etwas dezentere Hintergrundfarbe beim Hover/Ausklappen (optional)
                   background: isExpanded ? 'rgba(30, 41, 59, 0.5)' : 'transparent',
                   transition: 'background 0.2s',
                   borderRadius: isExpanded ? '12px 12px 0 0' : '12px'
                 }}
               >
+                {/* Spalte 1: Bild & Titel */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                   {milestone.image_url && (
-                    <img
-                      src={milestone.image_url}
-                      alt={milestone.name}
-                      style={{
-                        height: '30px', // Höhe fixieren
-                        width: 'auto',   // Breite automatisch anpassen lassen
-                        objectFit: 'contain', // Verhindert Verzerrung
-                        display: 'block' // Verhindert kleine Abstände nach unten
-                      }}
-                    />
+                    <img src={milestone.image_url} alt={milestone.name} style={{ height: '30px', width: 'auto', objectFit: 'contain', display: 'block' }} />
                   )}
                   <h3 style={{ margin: 0, color: '#f1f5f9', fontSize: '1.2rem', letterSpacing: '1px' }}>
                     {milestone.name}
                   </h3>
-                  <span style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 'bold' }}>({mRoutes.length} Routen)</span>
                 </div>
-                <div style={{ color: '#38bdf8', fontSize: '1.2rem', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }}>
+
+                {/* Spalte 2: Die Status-Boxen & Routen-Anzahl */}
+                <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {mRoutes.map(route => (
+                    <div
+                      key={route.id}
+                      title={route.route_name}
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '2px',
+                        background: getRouteColor(route),
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                        transition: 'background 0.3s ease'
+                      }}
+                    />
+                  ))}
+                  <span style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 'bold', marginLeft: '8px' }}>
+                    ({mRoutes.length})
+                  </span>
+                </div>
+
+                {/* Spalte 3: Pfeil */}
+                <div style={{ color: '#38bdf8', fontSize: '1.2rem', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s', textAlign: 'right' }}>
                   ▼
                 </div>
               </div>
