@@ -34,7 +34,6 @@ export default function Stats() {
               <span style={{ fontSize: '2.5rem' }}>📊</span>
               Hall of Fame
             </h1>
-            <p style={{ color: '#94a3b8', margin: '5px 0 0 55px', fontWeight: '600' }}>Die offizielle Soullink Bundesliga</p>
           </div>
 
           <button

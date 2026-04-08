@@ -100,7 +100,7 @@ export default function ActiveRun() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <h1 style={{ margin: 0, color: '#f1f5f9', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{data.run?.name}</h1>
             <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#38bdf8' }}>Helden:</span> {data.players.map(p => p.name).join(', ')}
+              <span style={{ color: '#38bdf8' }}>Unsere Helden:</span> {data.players.map(p => p.name).join(', ')}
             </div>
           </div>
         </div>
